@@ -299,7 +299,7 @@ rb_s_gpgme_data_new_from_mem (VALUE dummy, VALUE rdh, VALUE vbuffer,
   size_t size = NUM2UINT(vsize);
   gpgme_error_t err;
 
-  if (RSTRING_LEN(vbuffer) < size)
+  if ((unsigned)RSTRING_LEN(vbuffer) < size)
     rb_raise (rb_eArgError, "argument out of range");
 
   err = gpgme_data_new_from_mem (&dh, StringValuePtr(vbuffer), size, 1);
@@ -865,14 +865,18 @@ rb_s_gpgme_op_keylist_start (VALUE dummy, VALUE vctx, VALUE vpattern,
   CHECK_KEYLIST_NOT_IN_PROGRESS(vctx);
 
   UNWRAP_GPGME_CTX(vctx, ctx);
+
   if (!ctx)
     rb_raise (rb_eArgError, "released ctx");
 
   err = gpgme_op_keylist_start (ctx, NIL_P(vpattern) ? NULL :
                                 StringValueCStr(vpattern),
                                 NUM2INT(vsecret_only));
-  if (gpgme_err_code (err) == GPG_ERR_NO_ERROR)
+
+  if (gpgme_err_code (err) == GPG_ERR_NO_ERROR) {
     SET_KEYLIST_IN_PROGRESS(vctx);
+  }
+
   return LONG2NUM(err);
 }
 
@@ -900,10 +904,14 @@ rb_s_gpgme_op_keylist_ext_start (VALUE dummy, VALUE vctx, VALUE vpattern,
     }
 
   err = gpgme_op_keylist_ext_start (ctx, pattern, NUM2INT(vsecret_only), 0);
-  if (gpgme_err_code (err) == GPG_ERR_NO_ERROR)
+
+  if (gpgme_err_code (err) == GPG_ERR_NO_ERROR) {
     SET_KEYLIST_IN_PROGRESS(vctx);
+  }
+
   if (pattern)
     xfree (pattern);
+
   return LONG2NUM(err);
 }
 
