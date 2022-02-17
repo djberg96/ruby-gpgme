@@ -144,9 +144,9 @@ describe GPGME::Ctx do
     end
 
     it "should not segfault" do
-      cipher = GPGME::Data.new(KEY_1_ENCRYPTED)
-      ouput = GPGME::Data.new
-      
+      GPGME::Data.new(KEY_1_ENCRYPTED)
+      GPGME::Data.new
+
       GPGME::Ctx.new do |ctx|
         assert_raises ArgumentError do
           ctx.decrypt_result
@@ -194,7 +194,7 @@ describe GPGME::Ctx do
 
     it "doesn't allow just any value" do
       assert_raises GPGME::Error::InvalidValue do
-        ctx = GPGME::Ctx.new(:protocol => -200)
+        GPGME::Ctx.new(:protocol => -200)
       end
     end
   end
